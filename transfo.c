@@ -2,13 +2,14 @@
 
 void light(int w, int h, unsigned char *img, unsigned char val)
 {
-	int i,j;
-	unsigned char current;
-	#pragma omp parallel for
-	for (i = 0; i < w; i++) {
-		for (j = 0; j < h; j++) {
-			current = img[j * w + i];
-			img[j * w + i] = (((int) current + val) > 255) ? 255 : current + val;
+	#pragma omp parallel for collapse(2)
+	for (int i = 0; i < w; i++) {
+		for (int j = 0; j < h; j++) {
+			if ((img[j * w + i] + val) > 255) {
+				img[j * w + i] =  255;
+			} else {
+				img[j * w + i] = img[j * w + i] + val;
+			}
 		}
 	}
 }
@@ -16,12 +17,10 @@ void light(int w, int h, unsigned char *img, unsigned char val)
 void curve(int w, int h, unsigned char *img, unsigned char *lut)
 {
 	int i,j;
-  	unsigned char current;
-	#pragma omp parallel for
+	#pragma omp parallel for collapse(2)
   	for (i = 0; i < w; i++) {
   		for (j = 0; j < h; j++) {
-  			current = img[j * w + i];
-			img[j * w + i] = lut[current];
+			img[j * w + i] = lut[img[j * w + i]];
   		}
   	}
 }
