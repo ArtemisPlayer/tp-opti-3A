@@ -4,11 +4,7 @@
 #include <unistd.h>
 
 #include "transfo.h"
-#ifdef USE_CLOCK
-#include <time.h>
-#else
 #include "cycles.h"
-#endif
 
 void read_look_up_table(FILE *map, unsigned char *lut)
 {
@@ -55,11 +51,7 @@ void write_image(char *dest, unsigned char *img, long size, int width, int heigh
 	fclose (out);
 }
 
-#ifdef USE_CLOCK
-clock_t transform_image(char *source, char *curve, int light, char *dest)
-#else
 double transform_image(char *source, char *curve, int light, char *dest)
-#endif	
 {
 	FILE *in;
 	FILE *map;
@@ -70,15 +62,8 @@ double transform_image(char *source, char *curve, int light, char *dest)
 	int maxval;
 	long size;
 	unsigned char *source_image;
-	unsigned char *dest_image;
 	unsigned char *lut;
-#ifdef USE_CLOCK
-	clock_t start;
-	clock_t stop;
-	clock_t t;
-#else
 	double t;
-#endif
 
 	in = fopen(source, "r");
 	if (in == NULL) {
@@ -118,11 +103,6 @@ double transform_image(char *source, char *curve, int light, char *dest)
 		perror ("malloc for source image");
 		exit (1);
 	}
-	dest_image = (unsigned char *)malloc(sizeof(unsigned char) * size);
-	if (dest_image == NULL) {
-		perror ("malloc for destination image");
-		exit (1);
-	}
 	lut = (unsigned char *)malloc(sizeof(unsigned char) * 256);
 	if (lut == NULL) {
 		perror ("malloc for lut");
@@ -133,26 +113,14 @@ double transform_image(char *source, char *curve, int light, char *dest)
 
 	read_image(in, source_image, size);
 	fclose (in);
-
-#ifdef USE_CLOCK
-	start = clock();
-#else
 	start_counter();
-#endif
-	transfo (width, height, source_image, dest_image, lut, light);
-#ifdef USE_CLOCK
-	stop = clock();
-	t = stop - start;
-	printf("%ld clock cycles.\n", t);
-#else
+	transfo (width, height, source_image, lut, light);
 	t = get_counter();
 	printf("%f clock cycles.\n", t);
-#endif
-	write_image(dest, dest_image, size, width, height, maxval);
+	write_image(dest, source_image, size, width, height, maxval);
 
 	free(source_image);
 	free(lut);
-	free(dest_image);
 
 	return t;
 }
@@ -165,21 +133,12 @@ void run_transfo_file(FILE *tf)
 	char curve[FNMAX];
 	char dest[FNMAX];
 	int light;
-#ifdef USE_CLOCK
 	double total = 0;
-#else
-	clock_t total = 0;
-#endif
 	while (fscanf(tf, "%s %s %d %s", source, curve, &light, dest) == 4) {
 		printf("%s %s %d %s\n", source, curve, light, dest);
 		total += transform_image(source, curve, light, dest);
 	}
-
-#ifdef USE_CLOCK
-	printf("TOTAL: %f clock cycles.\n", total);
-#else
-	printf("TOTAL: %f clock cycles.\n", total);
-#endif
+	printf("TOTAL: %f clock cycles. %% base : %f\n", total, total/12166026030*100);
 }
 
 int main (int ac, char *av[])

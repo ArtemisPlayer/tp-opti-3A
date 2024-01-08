@@ -35,9 +35,8 @@ void curve(int w, int h, unsigned char *img, unsigned char *lut)
   	}
 }
 
-void transfo(int w, int h, unsigned char *src, unsigned char *dest, unsigned char *lut, unsigned char val)
+void transfo(int w, int h, unsigned char *src, unsigned char *lut, unsigned char val)
 {
-  	copy(w, h, src, dest);
-  	curve(w, h, dest, lut);
-  	light(w, h, dest, val);
+  	curve(w, h, src, lut);
+  	light(w, h, src, val);
 }
