@@ -1,19 +1,10 @@
-void copy (int w, int h, unsigned char *src, unsigned char *dest)
-{
-	int i,j;
-
-  	for (i = 0; i < w; i++) {
-		for (j = 0; j < h; j++) {
-			dest[j * w + i] = src[j * w + i];
-		}
-	}
-}
+#include <omp.h>
 
 void light(int w, int h, unsigned char *img, unsigned char val)
 {
 	int i,j;
 	unsigned char current;
-
+	#pragma omp parallel for
 	for (i = 0; i < w; i++) {
 		for (j = 0; j < h; j++) {
 			current = img[j * w + i];
@@ -26,7 +17,7 @@ void curve(int w, int h, unsigned char *img, unsigned char *lut)
 {
 	int i,j;
   	unsigned char current;
-
+	#pragma omp parallel for
   	for (i = 0; i < w; i++) {
   		for (j = 0; j < h; j++) {
   			current = img[j * w + i];
