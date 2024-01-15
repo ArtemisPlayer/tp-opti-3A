@@ -16,7 +16,7 @@ void transfo(int w, int h, unsigned char *img, unsigned char *lut, unsigned char
                 "no_overflow_%=:"
                 : "=a" (result)
                 : "g" (pixel), "g" (val)
-            );
+            ); 
 
             img[j * w + i] = result;
         }

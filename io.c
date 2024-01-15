@@ -138,7 +138,7 @@ void run_transfo_file(FILE *tf)
 		printf("%s %s %d %s\n", source, curve, light, dest);
 		total += transform_image(source, curve, light, dest);
 	}
-	printf("TOTAL: %f clock cycles. %% base : %f\n", total, total/12166026030*100);
+	printf("TOTAL: %f clock cycles. %% base : %f\n", total, total/12000000000*100);
 }
 
 int main (int ac, char *av[])
