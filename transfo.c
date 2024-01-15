@@ -1,32 +1,24 @@
 #include <omp.h>
 
-void light(int w, int h, unsigned char *img, unsigned char val)
+void transfo(int w, int h, unsigned char *img, unsigned char *lut, unsigned char val)
 {
-	#pragma omp parallel for collapse(2)
+  	#pragma omp parallel for collapse(2)
 	for (int i = 0; i < w; i++) {
-		for (int j = 0; j < h; j++) {
-			if ((img[j * w + i] + val) > 255) {
-				img[j * w + i] =  255;
-			} else {
-				img[j * w + i] = img[j * w + i] + val;
-			}
-		}
-	}
-}
+        for (int j = 0; j < h; j++) {
+            unsigned char result;
+            unsigned char pixel = lut[img[j * w + i]]; // curve effect
 
-void curve(int w, int h, unsigned char *img, unsigned char *lut)
-{
-	int i,j;
-	#pragma omp parallel for collapse(2)
-  	for (i = 0; i < w; i++) {
-  		for (j = 0; j < h; j++) {
-			img[j * w + i] = lut[img[j * w + i]];
-  		}
-  	}
-}
+            asm volatile (
+                "mov %1, %%al\n"
+                "add %2, %%al\n"
+                "jnc no_overflow_%=\n"
+                "mov $255, %%al\n"
+                "no_overflow_%=:"
+                : "=a" (result)
+                : "g" (pixel), "g" (val)
+            );
 
-void transfo(int w, int h, unsigned char *src, unsigned char *lut, unsigned char val)
-{
-  	curve(w, h, src, lut);
-  	light(w, h, src, val);
+            img[j * w + i] = result;
+        }
+    }
 }
